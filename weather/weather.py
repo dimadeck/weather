@@ -1,30 +1,32 @@
 import json
+import os
 
 import requests
 
 
 class CityData:
-    DEFAULT_CITY_LIST_PATH = 'data/city_list.json'
+    DEFAULT_CITY_LIST_PATH = os.path.join(os.path.dirname(__file__), 'data', 'city_list.json')
     KM_DEGREE = 0.009
     BBOX_ZOOM = 10
 
-    def __init__(self, city_path=DEFAULT_CITY_LIST_PATH):
+    def __init__(self, city_list_path=DEFAULT_CITY_LIST_PATH):
         """
-        Класс CityData хранит словарь с данными городов
+        Класс CityData хранит словарь с данными городов с интерфейсным методом get_bbox
+        для получения параметра границ области - квадрата с центром в переданном городе
 
-        :param city_path: Путь к json файлу с данными о городах (http://bulk.openweathermap.org/sample/)
+        :param city_list_path: Путь к json файлу с данными о городах (http://bulk.openweathermap.org/sample/)
         """
-        self._city_data = self._get_data(city_path)
+        self._city_data = self._get_city_list_data(city_list_path)
 
     @staticmethod
-    def _get_data(path):
+    def _get_city_list_data(city_list_path):
         """
         Метод для преобразования данных openweathermap в структуру {'city': {'id', 'lon', 'lat'}}
 
-        :param path: Путь к json файлу с данными о городах
+        :param city_list_path: Путь к json файлу с данными о городах
         :return: {'city': {'id', 'lon', 'lat'}}
         """
-        with open(path, 'r') as js_file:
+        with open(city_list_path, 'r') as js_file:
             city_list = json.load(js_file)
         city_data = {}
         for city in city_list:
@@ -34,6 +36,8 @@ class CityData:
 
     def get_bbox(self, city, distance):
         """
+        Метод для получения параметра границ области - квадрата с центром в переданном городе
+
         :param city: Название города латиницей
         :param distance: Расстояние в км до границы квадрата расстояние, в километрах, от
             выбранного города до ребра области заданной квадратом
@@ -54,7 +58,7 @@ class Weather:
         Класс для получения данных о погоде через сервис api.openweathermap.org
         :param api_key: Ключ для доступа к ресурсу
         """
-        self.api_key = api_key
+        self._api_key = api_key
         self._city_data = CityData()
 
     def get_weather(self, city, distance):
@@ -80,7 +84,7 @@ class Weather:
         :param bbox: Строка с описанием границ вида 'left,bottom,right,top,zoom'
         :return: URL
         """
-        return f'https://api.openweathermap.org/data/2.5/box/city?bbox={bbox}&appid={self.api_key}'
+        return f'https://api.openweathermap.org/data/2.5/box/city?bbox={bbox}&appid={self._api_key}&units=metric'
 
     @staticmethod
     def _request_data(url):
@@ -89,5 +93,4 @@ class Weather:
         :param url:
         :return: Ответ от ресурса
         """
-        response = requests.get(url)
-        return response.json()
+        return requests.get(url).json()

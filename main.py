@@ -1,6 +1,6 @@
 import argparse
 
-from report import ReportWeather
+from weather.report import ReportWeather
 
 DEFAULT_RESULT_DIR = 'results'
 
