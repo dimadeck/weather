@@ -1,8 +1,6 @@
 import argparse
 
-from weather.report import ReportWeather
-
-DEFAULT_RESULT_DIR = 'results'
+from weather.weather import Weather
 
 
 def parse_args():
@@ -11,17 +9,15 @@ def parse_args():
     parser.add_argument('-c', '--city')
     parser.add_argument('-d', '--distance')
     parser.add_argument('-w', '--weather_list_filename')
-    parser.add_argument('-r', '--result_dir', default=DEFAULT_RESULT_DIR)
 
     args = parser.parse_args()
-    return args.api_key, args.city, args.distance, args.weather_list_filename, args.result_dir
+    return args.api_key, args.city, args.distance, args.weather_list_filename
 
 
 def main():
-    api_key, city, distance, weather_list_filename, result_dir = parse_args()
-    rw = ReportWeather(api_key=api_key, city=city, distance=distance, weather_list_filename=weather_list_filename,
-                       result_dir=result_dir)
-    rw.run()
+    api_key, city, distance, weather_list_filename = parse_args()
+    weather = Weather(api_key)
+    weather.determinate_weather(city=city, distance=distance, weather_list_filename=weather_list_filename)
 
 
 if __name__ == '__main__':
